@@ -1,14 +1,8 @@
 name: Deploy to Production
 
 on:
-  workflow_call:
-    secrets: 
-      PA_USERNAME: 
-        required: true
-      PA_API_TOKEN:
-        required: true
-      PA_CONSOLE_ID:
-        required: true
+  push:
+    branches: [ master ]
     
   workflow_dispatch:
 
@@ -16,7 +10,6 @@ jobs:
   create_and_upload_artifact:
     name: Create and Upload Artifact
     runs-on: ubuntu-latest
-    environment: CI/CD
 
     steps:
     - name: Checkout code
