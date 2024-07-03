@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+  <h1>{% block title %}Register{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+
+<div class="register">
+    <h2>Join CHALLENGE VV now!</h2>
+    <form class="form" action="">
+        <label for="username" class="label">Email</label>
+        <input class="input-field" name="username" id="username" required>
+        </input>
+        <label class="label" for="password">Password</label>
+        <input class="input-field" type="password" name="password" id="password" required>
+        </input>
+        <label class="label" for="password_confirm">Password</label>
+        <input class="input-field" type="password" name="password_confirm" id="password_confirm" required>
+        </input>
+        <div class="button-group">
+          <button class="button">Register</button>
+        </div>
+        <div class="text-link">Forgot password?</div>
+    </form>
+</div>
+
+
+{% endblock %}
