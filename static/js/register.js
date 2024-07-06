@@ -1,7 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
   let formRegister = document.getElementById("form-register");
-  let toastError = document.getElementById("toast-error");
-  let toastErrorText = document.getElementById("toast-error-text");
 
   formRegister.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -27,9 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Function to create and show the toast
 function showToast(message, variant) {
-  let icon;
+  let icon = "";
   switch (variant) {
     case "ERROR":
       icon = `<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-red-500 bg-red-100 rounded-lg dark:bg-red-800 dark:text-red-200">
