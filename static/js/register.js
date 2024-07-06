@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showToast(res.message, "ERROR");
         });
     } else {
-      alert("Passwords must be the same");
+      showToast("Passwords must be the same", "ERROR");
     }
   });
 });
@@ -65,23 +65,20 @@ function showToast(message, variant) {
 
   // Append the toast to the designated container
   var toastsContainer = document.getElementById("toasts-container");
-  if (toastsContainer) {
+  if (toastsContainer && toastsContainer.childElementCount <= 4) {
     toastsContainer.appendChild(toastElement.firstChild);
 
-    // Show the toast (remove the 'hidden' class)
-    var toast = document.getElementById("toast");
-    toast.classList.remove("hidden");
+    var toasts = toastsContainer.childNodes;
 
-    // Fade out and remove the toast after 1500ms
-    setTimeout(function () {
-      toast.classList.add("transition", "duration-300", "opacity-0");
+    toasts.forEach(function (toast, index) {
       setTimeout(function () {
-        toast.remove();
-      }, 300); // Wait for the fade out transition to complete (300ms)
-    }, 1500); // 1500ms delay before starting to fade out
-  } else {
-    console.error(
-      "Could not find toasts container with id 'toasts-container'."
-    );
+        if (toast.classList) {
+          toast.classList.add("transition", "duration-300", "opacity-0");
+        }
+        setTimeout(function () {
+          toast.remove();
+        }, 300); // Wait for the fade out transition to complete (300ms)
+      }, index * 700); // Apply a delay of 1000ms (1 second) between each toast
+    });
   }
 }
