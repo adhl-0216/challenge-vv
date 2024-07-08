@@ -1,7 +1,23 @@
-document.addEventListener("DOMContentLoaded", () => {
-  let formRegister = document.getElementById("form-register");
+document.addEventListener("DOMContentLoaded", function () {
+  const formRegister = document.getElementById("form-register");
+  const rolesDropdown = document.getElementById("roles-dropdown");
+  const dropdownMenu = document.getElementById("dropdown");
 
-  formRegister.addEventListener("submit", (e) => {
+  let selectedRole = null;
+
+  rolesDropdown.addEventListener("click", function () {
+    dropdownMenu.classList.toggle("hidden");
+  });
+
+  dropdownMenu.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") {
+      selectedRole = e.target.getAttribute("data-value");
+      rolesDropdown.querySelector("span").textContent = e.target.textContent;
+      dropdownMenu.classList.toggle("hidden");
+    }
+  });
+
+  formRegister.addEventListener("submit", function (e) {
     e.preventDefault();
     const formData = new FormData(formRegister);
     const creds = {};
@@ -9,23 +25,64 @@ document.addEventListener("DOMContentLoaded", () => {
       creds[key] = value;
     });
 
-    if (creds.password == creds.password_confirm) {
-      firebase
-        .auth()
-        .createUserWithEmailAndPassword(creds.email, creds.password)
-        .then((res) => {
-          console.log(res.user);
-        })
-        .catch((res) => {
-          showToast(res.message, "ERROR");
-        });
-    } else {
+    if (creds.password != creds.password_confirm) {
       showToast("Passwords must be the same", "ERROR");
+      return;
     }
+
+    if (selectedRole == null) {
+      showToast("Please select a role", "ERROR");
+      return;
+    }
+
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(creds.email, creds.password)
+      .then((res) => {
+        registrationSuccess(res, selectedRole);
+      })
+      .catch((res) => {
+        showToast(res.message, "ERROR");
+      });
   });
 });
 
-function showToast(message, variant) {
+function registrationSuccess(res, selectedRole) {
+  const data = {
+    uid: res.user.uid,
+    role: selectedRole,
+  };
+
+  fetch("/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+    redirect: "follow",
+  })
+    .then((res) => {
+      if (res.redirected) {
+        showToast(
+          "Registration successful! Welcome aboard! We're excited to have you with us.",
+          "SUCCESS",
+          2000
+        );
+        const redirectUrl = res.url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        }
+      } else {
+        throw new Error("Registration failed");
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      showToast("Error: Registration failed. Please try again.", "ERROR", 2000);
+    });
+}
+
+function showToast(message, variant, delay = 750) {
   let icon = "";
   switch (variant) {
     case "ERROR":
@@ -46,7 +103,6 @@ function showToast(message, variant) {
       break;
   }
 
-  // Construct the HTML string for the toast
   var toastHTML = `
         <div id="toast" class="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800" role="alert">
                 ${icon}
@@ -63,7 +119,6 @@ function showToast(message, variant) {
   var toastElement = document.createElement("div");
   toastElement.innerHTML = toastHTML.trim();
 
-  // Append the toast to the designated container
   var toastsContainer = document.getElementById("toasts-container");
   if (toastsContainer && toastsContainer.childElementCount <= 4) {
     toastsContainer.appendChild(toastElement.firstChild);
@@ -73,12 +128,12 @@ function showToast(message, variant) {
     toasts.forEach(function (toast, index) {
       setTimeout(function () {
         if (toast.classList) {
-          toast.classList.add("transition", "duration-300", "opacity-0");
+          toast.classList.add("transition", "duration-500", "opacity-0");
         }
         setTimeout(function () {
           toast.remove();
-        }, 300); // Wait for the fade out transition to complete (300ms)
-      }, index * 700); // Apply a delay of 1000ms (1 second) between each toast
+        }, 300);
+      }, (index + 1) * delay);
     });
   }
 }
